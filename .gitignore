@@ -208,5 +208,7 @@ __marimo__/
 
 # project
 CRSIDLab_*/
+csvs/
 data/
 mimic/
+old/
