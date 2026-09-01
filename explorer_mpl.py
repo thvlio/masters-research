@@ -6,32 +6,29 @@ import wfdb.io
 from matplotlib import pyplot as plt
 from matplotlib.widgets import Slider, Button
 
+from config import Config as c
+
 
 def main():
 
     plt.rcParams.update({'font.size': 18})
 
-    dataset_root = Path('/home/thulio/projects/masters-research/data')
-
-    csvs_root = Path('/home/thulio/projects/masters-research/csvs')
-
-    signal_names = ['II', 'PLETH', 'ABP']
-
     window = 5 * 60
 
-    df_subjects = pd.read_csv(csvs_root / 'subjects.csv')
+    df_subjects = pd.read_csv(c.SUBJECTS_PATH)
 
-    if (csvs_root / 'samples.csv').exists():
-        df_samples_prev = pd.read_csv(csvs_root / 'samples.csv', dtype={'sample_start': 'Int64'})
-        df_samples = df_subjects.merge(df_samples_prev, on=['subject_id', 'master_id', 'segment_id'], how='left')
+    if (c.SAMPLES_PATH).exists():
+        df_samples_prev = pd.read_csv(c.SAMPLES_PATH, dtype={'sample_start': 'Int64', 'sample_end': 'Int64'})
+        df_samples = df_subjects.merge(df_samples_prev, on=['subject_id', 'master_id', 'segment_id', 'class'], how='left')
     else:
         df_samples = df_subjects.copy()
         df_samples['sample_start'] = pd.NA
+        df_samples['sample_end'] = pd.NA
 
     def append_subject_data(row: pd.Series):
         subject_id, segment_id, label = row[['subject_id', 'segment_id', 'class']]
-        p_folder = dataset_root / label / f'p{subject_id:06d}'
-        signals, fields = wfdb.io.rdsamp(p_folder / segment_id, channel_names=signal_names)
+        p_folder = c.RECORDS_DIR / label / f'p{subject_id:06d}'
+        signals, fields = wfdb.io.rdsamp(p_folder / segment_id, channel_names=c.SIGNAL_NAMES)
         time = np.arange(fields['sig_len']) / fields['fs']
         return pd.concat([row, pd.Series({'time': time, 'signals': signals}), pd.Series({f'fields.{k}': v for k, v in fields.items()})])
 
@@ -45,13 +42,13 @@ def main():
         ws = signals[sa:sb, :]
         return wt, ws
 
-    fig, axes = plt.subplots(3, 1, figsize=(16, 8), sharex=True, layout='constrained')
+    fig, axes = plt.subplots(len(c.SIGNAL_NAMES), 1, figsize=(16, 8), sharex=True, layout='constrained', num='record explorer')
     axes: tuple[plt.Axes]
     # plt.tight_layout()
     wt, ws = get_slice(0, 0)
     lines = []
-    for k, (ax, signal_name) in enumerate(zip(axes, signal_names)):
-        line, = ax.plot(wt, ws[:, k])
+    for k, (ax, signal_name) in enumerate(zip(axes, c.SIGNAL_NAMES)):
+        line, = ax.plot(wt, ws[:, k], color=f'C{k}')
         lines.append(line)
         ax.set_xlabel('Time [s]')
         ax.set_ylabel(signal_name)
@@ -122,18 +119,20 @@ def main():
     ax_load = fig.add_axes([0.94, 0.02, 0.04, 0.025])
     load_button = Button(ax_load, 'restore', hovercolor='0.975')
 
+    relevant_columns = ['subject_id', 'master_id', 'segment_id', 'class', 'sample_start', 'sample_end']
+
     def save(_event):
         df_samples.loc[int(subject_slider.val), 'sample_start'] = time_slider.val
-        df_samples.to_csv(csvs_root / 'samples.csv', index=False, columns=['subject_id', 'master_id', 'segment_id', 'sample_start'])
-        df_samples.to_csv(csvs_root / 'samples_full.csv', index=False)
+        df_samples.loc[int(subject_slider.val), 'sample_end'] = time_slider.val + df_samples.loc[int(subject_slider.val), 'fields.fs'] * window
+        df_samples.to_csv(c.SAMPLES_PATH, index=False, columns=relevant_columns)
         update_stored(int(time_slider.val))
 
     save_button.on_clicked(save)
 
     def reset(_event):
         df_samples.loc[int(subject_slider.val), 'sample_start'] = pd.NA
-        df_samples.to_csv(csvs_root / 'samples.csv', index=False, columns=['subject_id', 'master_id', 'segment_id', 'sample_start'])
-        df_samples.to_csv(csvs_root / 'samples_full.csv', index=False)
+        df_samples.loc[int(subject_slider.val), 'sample_end'] = pd.NA
+        df_samples.to_csv(c.SAMPLES_PATH, index=False, columns=relevant_columns)
         update_stored(pd.NA)
 
     reset_button.on_clicked(reset)

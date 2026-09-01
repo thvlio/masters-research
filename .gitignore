@@ -210,5 +210,7 @@ __marimo__/
 CRSIDLab_*/
 csvs/
 data/
+images/
 mimic/
 old/
+temp_dir/
