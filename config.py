@@ -5,6 +5,10 @@ class Config:
 
     DATA_DIR = Path('data')
 
+    IMAGES_DIR = Path('images')
+
+    CRSIDLAB_DIR = Path('crsidlab') / 'CRSIDLab_Sept2024'
+
     CSV_DIR = DATA_DIR / 'csvs'
 
     RECORDS_DIR = DATA_DIR / 'selected'
@@ -13,7 +17,7 @@ class Config:
 
     PYPPG_DIR = DATA_DIR / 'pyppg'
 
-    PYPPG_TEMP_DIR = DATA_DIR = PYPPG_DIR / 'temp'
+    PYPPG_TEMP_DIR = PYPPG_DIR / 'temp'
 
     SUBJECTS_PATH = CSV_DIR / 'subjects.csv'
 

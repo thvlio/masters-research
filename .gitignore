@@ -212,5 +212,5 @@ csvs/
 data/
 images/
 mimic/
-old/
+# old/
 temp_dir/
