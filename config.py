@@ -3,6 +3,8 @@ from pathlib import Path
 
 class Config:
 
+    # paths
+
     DATA_DIR = Path('data')
 
     IMAGES_DIR = Path('images')
@@ -25,4 +27,14 @@ class Config:
 
     POINTS_PATH = CSV_DIR / 'points.csv'
 
+    # signals
+
     SIGNAL_NAMES = ['II', 'PLETH', 'ABP']
+
+    SIGNAL_FS = 125
+
+    # processing
+
+    NUM_SELECTED_CYCLES = 30
+
+    NUM_DISCARDED_EDGE_CYCLES = 2

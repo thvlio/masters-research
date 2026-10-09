@@ -1,5 +1,4 @@
 import logging
-from pathlib import Path
 
 import neurokit2 as nk
 import numpy as np
