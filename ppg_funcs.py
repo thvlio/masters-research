@@ -1,7 +1,7 @@
 import contextlib
 import itertools
 from pathlib import Path
-from typing import Literal
+# from typing import Literal
 
 import neurokit2 as nk
 import numpy as np
@@ -45,6 +45,7 @@ def load_points(
 def get_peaks_and_onsets(
             df_points: pd.DataFrame,
             subject_id: int,
+            *,
             fs: int = c.SIGNAL_FS,
             trim_peaks: bool = True
         ):
@@ -63,6 +64,7 @@ def get_peaks_and_onsets(
 def load_ppg(
             subject_id: int,
             segment_id: str,
+            *,
             ppg_dir: str | Path = c.PPG_DIR,
             s0: int | None = 2 * 60 * c.SIGNAL_FS,
             s1: int | None = 3 * 60 * c.SIGNAL_FS,
@@ -85,6 +87,7 @@ def load_ppg(
 def make_filter(
             design: str = 'butter',
             wn: int | tuple[int, int] = (0.5, 30),
+            *,
             fs: int = c.SIGNAL_FS
         ):
 
@@ -109,7 +112,7 @@ def filter_ppg(
 
 def preprocess_ppg( # pylint: disable=W0102
             ppg_raw: np.ndarray,
-            fs: int = c.SIGNAL_FS,
+            *,
             filtering: bool = True,
             ft_design: str = 'butter',
             ft_wn: int | tuple[int, int] = (0.5, 30),
@@ -118,7 +121,8 @@ def preprocess_ppg( # pylint: disable=W0102
             sm_wins: dict[str, int] = {'ppg': 50, 'vpg': 10, 'apg': 10, 'jpg': 10},
             savgol: bool = False,
             sg_win: int = 3,
-            sg_poly: int = 2
+            sg_poly: int = 2,
+            fs: int = c.SIGNAL_FS
         ):
 
     if filtering:
@@ -172,20 +176,16 @@ def normalize_cycles(
             jpg: np.ndarray[float],
             peaks: np.ndarray,
             cycles: pd.DataFrame,
+            *,
             fs: int = c.SIGNAL_FS
         ):
 
-    ppg_norm_cycle_signals = np.array([scipy.signal.resample(ppg[on:off], fs) for on, off in cycles])
-    vpg_norm_cycle_signals = np.array([scipy.signal.resample(vpg[on:off], fs) for on, off in cycles])
-    apg_norm_cycle_signals = np.array([scipy.signal.resample(apg[on:off], fs) for on, off in cycles])
-    jpg_norm_cycle_signals = np.array([scipy.signal.resample(jpg[on:off], fs) for on, off in cycles])
+    signals = (ppg, vpg, apg, jpg)
+    normalized_signals = [np.array([scipy.signal.resample(signal[on:off], fs) for on, off in cycles]) for signal in signals]
 
-    ppg_norm_cycle_peaks = np.array([int(round((k + (peak - on) / (off - on)) * fs)) for k, ((on, off), peak) in enumerate(zip(cycles, peaks))])
+    normalized_peaks = np.array([int(round((k + (peak - on) / (off - on)) * fs)) for k, ((on, off), peak) in enumerate(zip(cycles, peaks))])
 
-    cycles = (ppg_norm_cycle_signals, vpg_norm_cycle_signals, apg_norm_cycle_signals, jpg_norm_cycle_signals)
-    peaks = ppg_norm_cycle_peaks
-
-    return cycles, peaks
+    return normalized_signals, normalized_peaks
 
 
 def select_cycles(
@@ -258,9 +258,9 @@ def get_fiducial_points( # pylint: disable=W0102
         fiducials = fpex.get_fiducials(s, peaks, onsets)
         fp = Fiducials(fp=fiducials)
 
-    df_fp = fp.get_fp()
+    df_fps = fp.get_fp()
 
-    return df_fp
+    return df_fps
 
 
 def calc_indices(

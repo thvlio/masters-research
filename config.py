@@ -9,13 +9,15 @@ class Config:
 
     IMAGES_DIR = Path('images')
 
-    CRSIDLAB_DIR = Path('crsidlab') / 'CRSIDLab_Sept2024'
+    CRSIDLAB_DIR = Path('crsidlab') / 'CRSIDLab_3_0_Sept2024_Corrigida'
 
     CSV_DIR = DATA_DIR / 'csvs'
 
     RECORDS_DIR = DATA_DIR / 'selected'
 
     PPG_DIR = DATA_DIR / 'ppg'
+
+    ECG_ABP_DIR = DATA_DIR / 'ecg+abp'
 
     PYPPG_DIR = DATA_DIR / 'pyppg'
 
