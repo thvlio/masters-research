@@ -286,8 +286,7 @@ def calc_indices(
     t_50_rise = np.abs(ppg[:s_fp['sp']] - s_50).argmin()
     t_50_fall = np.abs(ppg[s_fp['sp']:] - s_50).argmin() + s_fp['sp']
     t_pw = t_50_fall - t_50_rise
-    ri = a_d / a_s
-    ai = (a_s - a_d) / a_s
+    ai = a_d / a_s
 
     # vpg
     t_dt = t_dp - t_sp
@@ -309,40 +308,39 @@ def calc_indices(
 
     s_indices = pd.Series({
         # ppg
-        'a_s': a_s,
-        'a_d': a_d,
-        't_pw': t_pw,
-        'ri': ri,
-        'ai': ai,
+        'ppg.a_s': a_s,
+        'ppg.a_d': a_d,
+        'ppg.t_pw': t_pw,
+        'ppg.ai': ai,
         # vpg
-        't_dt': t_dt,
-        't_ct': t_ct,
+        'vpg.t_dt': t_dt,
+        'vpg.t_ct': t_ct,
         # apg
-        'r_b_a': r_b_a,
-        'r_c_a': r_c_a,
-        'r_d_a': r_d_a,
-        'r_e_a': r_e_a,
-        'r_b_c_d_e_a': r_b_c_d_e_a,
-        'r_b_e_a': r_b_e_a,
-        'r_b_c_d_a': r_b_c_d_a
+        'apg.r_b_a': r_b_a,
+        'apg.r_c_a': r_c_a,
+        'apg.r_d_a': r_d_a,
+        'apg.r_e_a': r_e_a,
+        'apg.r_b_c_d_e_a': r_b_c_d_e_a,
+        'apg.r_b_e_a': r_b_e_a,
+        'apg.r_b_c_d_a': r_b_c_d_a
     })
 
     if return_all:
         s_others = pd.Series({
             # ppg
-            't_on': t_on,
-            's_z': s_z,
-            't_sp': t_sp,
-            't_dp': t_dp,
-            's_50': s_50,
-            't_50_rise': t_50_rise,
-            't_50_fall': t_50_fall,
+            'ppg.t_on': t_on,
+            'ppg.s_z': s_z,
+            'ppg.t_sp': t_sp,
+            'ppg.t_dp': t_dp,
+            'ppg.s_50': s_50,
+            'ppg.t_50_rise': t_50_rise,
+            'ppg.t_50_fall': t_50_fall,
             # apg
-            's_a': s_a,
-            's_b': s_b,
-            's_c': s_c,
-            's_d': s_d,
-            's_e': s_e
+            'apg.s_a': s_a,
+            'apg.s_b': s_b,
+            'apg.s_c': s_c,
+            'apg.s_d': s_d,
+            'apg.s_e': s_e
         })
         s_indices = pd.concat([s_indices, s_others])
 
