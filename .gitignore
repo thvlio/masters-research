@@ -209,8 +209,10 @@ __marimo__/
 # project
 CRSIDLab_*/
 csvs/
-data/
+data/*
+!data/csvs/
 images/
+matlab/
 mimic/
 # old/
 temp_dir/
